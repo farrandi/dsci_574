@@ -93,3 +93,54 @@ ax1.set_ylabel('ACF')
   - When the magnitude of the seasonal fluctuations does not change with the level of the time series
 - **Multiplicative Model**: $Y_t = T_t \times S_t \times R_t$
   - When the magnitude of the seasonal fluctuations does change with the level of the time series
+
+#### Estimating the Trend
+
+1. **Curve Fitting**: Fit a polynomial of degree $n$ to the time series
+
+   ```python
+   from statsmodels.tsa.tsatools import detrend
+
+   detrended = data - detrend(data, order=2) # order=2 for quadratic
+   ```
+
+2. **Moving Average**: Smooths out short-term fluctuations and highlights longer-term trends
+
+   ```python
+   # rolling is a pandas function
+   rolling_mean = df.rolling(window=5, center=True).mean()
+
+   # For even window, common practice to do:
+   window = 4
+   df.rolling(window).mean().rolling(2).mean().shift(-window//2)
+   ```
+
+   - `window`: Number of observations used for calculating the statistic
+   - `center`: Set the labels at the center of the window
+     - if odd, the label is at the center
+     - if even, the label is at the right
+
+- The even code does this:
+  <img src="images/1_even_ma.gif" width="400">
+
+#### Estimating Seasonality
+
+- Simple steps:
+  1. Remove the trend from the data (the detrended data above)
+  2. Estimate the seasonal component by averaging the detrended data over each season
+
+#### Estimating the Residual
+
+- The residual is the remainder after removing the trend and seasonal components
+- If additive model: $R_t = Y_t - T_t - S_t$
+- If multiplicative model: $R_t = \frac{Y_t}{T_t \times S_t}$
+
+#### All Together
+
+- Luckily, there exists a function to do all of this for us: `seasonal_decompose()`
+
+```python
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+decomposition = seasonal_decompose(data, model='additive', period=12)
+```
