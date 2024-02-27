@@ -90,9 +90,9 @@ ax1.set_ylabel('ACF')
 <img src="images/1_add_mult.png" width="550">
 
 - **Additive Model**: $Y_t = T_t + S_t + R_t$
-  - When the magnitude of the seasonal fluctuations does not change with the level of the time series
+  - When the magnitude of the seasonal fluctuations **does not change** with the level of the time series
 - **Multiplicative Model**: $Y_t = T_t \times S_t \times R_t$
-  - When the magnitude of the seasonal fluctuations does change with the level of the time series
+  - When the magnitude of the seasonal fluctuations **does change** with the level of the time series
 
 #### Estimating the Trend
 
@@ -143,4 +143,11 @@ ax1.set_ylabel('ACF')
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 decomposition = seasonal_decompose(data, model='additive', period=12)
+
+decomposition.trend # the trend component
+decomposition.seasonal # the seasonal component
+decomposition.resid # the residual component
+
+# plot the decomposition
+fig = decomposition.plot()
 ```
