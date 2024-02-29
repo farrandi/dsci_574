@@ -127,7 +127,9 @@ from statsmodels.tsa.arima.model import ARIMA
 # All with first order differencing
 model_ar = ARIMA(data["col"], order=(3, 1, 0)).fit() # AR(3)
 model_ma = ARIMA(data["col"], order=(0, 1, 1)).fit() # MA(1)
-model_arma = ARIMA(data["col"], order=(3, 1, 3)).fit() # ARMA(3, 3)
+model_arima = ARIMA(data["col"], order=(3, 1, 3)).fit() # ARIMA(3, 3)
+
+model_arma = ARIMA(data["col"], order=(3, 0, 3)).fit() # ARMA(3, 3)
 ```
 
 #### ARIMA hyperparameter tuning
@@ -141,4 +143,44 @@ autoarima = pm.auto_arima(data.col,
                           seasonal=False)
 
 autoarima.summary()
+```
+
+#### SARIMA
+
+- **SARIMA**: Seasonal ARIMA
+- `SARIMA(p, d, q)(P, D, Q, m)`
+  - `p`, `d`, `q`: ARIMA parameters
+  - `P`, `D`, `Q`: Seasonal ARIMA parameters
+  - `m`: seasonal period
+
+```python
+sarima = ARIMA(data["col"], order=(3, 1, 3), seasonal_order=(1, 1, 1, 12)).fit()
+```
+
+- Also have **SARIMAX** (with exogenous variables)
+  - adds exogenous variables (other time series) to the model
+  - Not the most effective model
+
+### Choosing Orders
+
+- **ACF and PACF plots**
+  - ACF: Autocorrelation Function
+  - PACF: Partial Autocorrelation Function
+  - Use these to determine the order of the AR and MA models
+
+| ACF Plot                                                          | PACF Plot                                   |
+| ----------------------------------------------------------------- | ------------------------------------------- |
+| Measures correlation between an observation and its lagged values | same but removes the effect of shorter lags |
+| For **MA(q)**                                                     | For **AR(p)**                               |
+| Cuts off after lag q                                              | Cuts off after lag p                        |
+
+- See the cutoff when the peaks are lower than the blue shaded region
+
+<img src="images/3_acf.png" width="300">
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+plot_acf(data, lags=40)
+plot_pacf(data, lags=40)
 ```
