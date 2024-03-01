@@ -93,9 +93,11 @@ print('p-value: %f' % result[1])
 | $\phi$: AR coefficients                                                        | $\theta$: MA coefficients                                                                                 |
 | $\epsilon_t$: white noise                                                      | $\epsilon_t$: white noise                                                                                 |
 | Long memory model: $y_1$ has a direct effect on $y_t$ for all $t$              | Short memory model: $y_t$ is only affected by recent values of $\epsilon$                                 |
-| Captures long-term trends and patterns                                         | Captures short-term fluctuations/ noise                                                                   |
 | Good for modeling time-series with dependency on past values                   | Good for modeling time-series with a lot of volatility and noise                                          |
 | Less sensitive to choice of lag or window size                                 | More sensitive to choice of lag or window size                                                            |
+
+- Both values are between -1 and 1
+- AR value of 1 means that the time series is a random walk
 
 ### ARMA Model
 
