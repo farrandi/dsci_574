@@ -88,11 +88,12 @@ print('p-value: %f' % result[1])
 
 | AR (AutoRegressive) Model                                                      | MA (Moving Average) Model                                                                                 |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Regression of the time series on its own lagged values                         | Regression of the time series on past forecast errors                                                     |
 | $y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t$ | $y_t = \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}$ |
 | $p$: order of the AR model                                                     | $q$: order of the MA model                                                                                |
 | $\phi$: AR coefficients                                                        | $\theta$: MA coefficients                                                                                 |
 | $\epsilon_t$: white noise                                                      | $\epsilon_t$: white noise                                                                                 |
-| Long memory model: $y_1$ has a direct effect on $y_t$ for all $t$              | Short memory model: $y_t$ is only affected by recent values of $\epsilon$                                 |
+| **Long memory model**: $y_1$ has a direct effect on $y_t$ for all $t$          | **Short memory model**: $y_t$ is only affected by recent values of $\epsilon$                             |
 | Good for modeling time-series with dependency on past values                   | Good for modeling time-series with a lot of volatility and noise                                          |
 | Less sensitive to choice of lag or window size                                 | More sensitive to choice of lag or window size                                                            |
 
@@ -170,19 +171,39 @@ sarima = ARIMA(data["col"], order=(3, 1, 3), seasonal_order=(1, 1, 1, 12)).fit()
   - PACF: Partial Autocorrelation Function
   - Use these to determine the order of the AR and MA models
 
-| ACF Plot                                                          | PACF Plot                                   |
-| ----------------------------------------------------------------- | ------------------------------------------- |
-| Measures correlation between an observation and its lagged values | same but removes the effect of shorter lags |
-| For **MA(q)**                                                     | For **AR(p)**                               |
-| Cuts off after lag q                                              | Cuts off after lag p                        |
+| ACF Plot                                                          | PACF Plot                                                                     |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Measures correlation between an observation and its lagged values | same but removes intermediate correlations (kinda isolates the direct effect) |
+| For **MA(q)**, cuts off after lag q                               | For **AR(p)**, cuts off after lag p                                           |
+| Else, tails off (exp or like damped sin)                          | Else, tails off (no clear pattern)                                            |
 
-- See the cutoff when the peaks are lower than the blue shaded region
+- See the cutoff when the peaks are lower than the shaded region
 
-<img src="images/3_acf.png" width="300">
+#### Example
+
+1. $y_t=-0.9y_{t-1}+\epsilon_t$
+   <img src="images/3_eq1.png" width="550">
+2. $y_t=0.3y_{t-1}+\epsilon_t$
+   <img src="images/3_eq2.png" width="550">
+
+3. $y_t=0.5y_{t-1}-0.8y_{t-2}+\epsilon_t$
+   <img src="images/3_eq3.png" width="550">
 
 ```python
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.arima_process import ArmaProcess
 
-plot_acf(data, lags=40)
-plot_pacf(data, lags=40)
+# Simulate 1
+df = pd.DataFrame(ArmaProcess(ar=[1, -0.9]).generate_sample())
+# Simulate 2
+df = pd.DataFrame(ArmaProcess(ar=[1, 0.3]).generate_sample())
+# Simulate 3
+df = pd.DataFrame(ArmaProcess(ar=[1, -0.5, 0.8]).generate_sample())
+
+# Plot
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18, 5))
+fig.suptitle("y_t = 0.9y_{t-1} + e_t")
+df.plot(ax=axes[0])
+plot_acf(df, ax=axes[1])
+plot_pacf(df, ax=axes[2]);
 ```
