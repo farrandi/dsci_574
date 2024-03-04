@@ -222,3 +222,91 @@ df.plot(ax=axes[0])
 plot_acf(df, ax=axes[1])
 plot_pacf(df, ax=axes[2])
 ```
+
+#### Whole process with ARIMA
+
+(Based on lab 2 q4)
+
+1. **Load Data**
+
+   ```python
+   import pandas as pd
+
+   # turns first col into index + parses dates
+   df = pd.read_csv('data.csv', index_col=0, parse_dates=True)
+   ```
+
+2. **EDA** with plot + ACF + PACF (Stationarity check)
+
+   ```python
+   import matplotlib.pyplot as plt
+   from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+   fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18, 5))
+   df.plot(ax=axes[0])
+   plot_acf(df, ax=axes[1])
+   plot_pacf(df, ax=axes[2]);
+   ```
+
+   - Can also check with ADF test (p>0.05 means non-stationary)
+
+   ```python
+   from statsmodels.tsa.stattools import adfuller
+
+   # ADF test
+   result = adfuller(data)
+   ```
+
+3. **Make the time series stationary**
+
+   ```python
+   # Difference
+   data1 = data.diff().dropna()
+
+    # Log transformation
+    data = np.log(data)
+   ```
+
+   - Repeat step 2 and check, also use ACF and PACF to find the AR and MA orders
+
+4. **ARIMA Model**
+
+   ```python
+   from statsmodels.tsa.arima.model import ARIMA
+
+   model = ARIMA(train, order=(2, 1, 2), seasonal_order=(0, 1, 0, 12)).fit()
+
+   model.summary()
+   model.plot_diagnostics()
+   ```
+
+   - Can also use `auto_arima` from `pmdarima` for hyperparameter tuning
+
+   ```python
+   import pmdarima as pm
+
+   autoarima = pm.auto_arima(data.col,
+                             start_p=0, star_d=1, start_q=0,
+                             max_p=5, max_d=3, max_q=5,
+                             seasonal=False)
+
+   autoarima.summary()
+   autoarima.plot_diagnostics()
+   ```
+
+5. **Forecast**
+
+   ```python
+   forecast = model.forecast(steps=len(valid))
+   ```
+
+   - Can also use `predict` for in-sample prediction
+
+   ```python
+   pred = model.predict(start=len(train), end=len(train)+len(valid)-1)
+
+   fig, ax = plt.subplots()
+   ax.plot(valid, label='Valid')
+   ax.plot(pred, label='Prediction')
+   ax.legend()
+   ```
