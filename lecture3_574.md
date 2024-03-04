@@ -80,7 +80,7 @@ print('p-value: %f' % result[1])
   data1 = data.diff().dropna()
   # Second difference
   data2 = data.diff().diff().dropna()
-  # Seasonal difference
+  # Seasonal difference, m is the seasonal period
   data_m = data.diff(m).dropna()
   ```
 
@@ -141,7 +141,7 @@ model_arma = ARIMA(data["col"], order=(3, 0, 3)).fit() # ARMA(3, 3)
 import pmdarima as pm
 
 autoarima = pm.auto_arima(data.col,
-                          start_q=0, star_d=1, start_q=0,
+                          start_p=0, star_d=1, start_q=0,
                           max_p=5, max_d=3, max_q=5,
                           seasonal=False)
 
@@ -179,7 +179,7 @@ sarima = ARIMA(data["col"], order=(3, 1, 3), seasonal_order=(1, 1, 1, 12)).fit()
 
 - See the cutoff when the peaks are lower than the shaded region
 
-#### Example
+#### Example AR
 
 1. $y_t=-0.9y_{t-1}+\epsilon_t$
    <img src="images/3_eq1.png" width="550">
@@ -206,4 +206,19 @@ fig.suptitle("y_t = 0.9y_{t-1} + e_t")
 df.plot(ax=axes[0])
 plot_acf(df, ax=axes[1])
 plot_pacf(df, ax=axes[2]);
+```
+
+#### Example MA
+
+1. $y_t = \epsilon_t + 0.9\epsilon_{t-1}$
+   <img src="images/3_ma.png" width="550">
+
+```python
+df = pd.DataFrame(ArmaProcess(ma=[1, -0.9]).generate_sample())
+
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18, 6))
+fig.suptitle("$y_t = \epsilon_t - 0.9 \epsilon_{t-1} $")
+df.plot(ax=axes[0])
+plot_acf(df, ax=axes[1])
+plot_pacf(df, ax=axes[2])
 ```
