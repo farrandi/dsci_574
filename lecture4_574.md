@@ -18,6 +18,7 @@
 ```python
 import pandas as pd
 
+# turns first col into index + parses dates
 df = pd.read_csv('data.csv', index_col=0, parse_dates=True)
 ```
 
@@ -69,11 +70,40 @@ results = evaluate(forecaster=forecaster, y=y_train, cv=cv, strategy="refit", re
 
 ### Forecasting
 
-1. **One-step forecasting**
-2. **Multi-step forecasting**
-   a. **Recursive strategy**
-   b. **Direct strategy**
+1. **One-step forecasting**: one step ahead
+2. **Multi-step forecasting**: multiple steps ahead
+   a. **Recursive strategy**: predict `t`, then it becomes part of the input for `t+1`
+   b. **Direct strategy**: have a model for each step (model for `t+1`, another for `t+2`, etc)
    c. **Hybrid strategy**: is dumb and bad
    d. **Multi-output strategy**: 2 different series (e.g. temperature and humidity)
 
+```python
+from sklearn.neighbors import KNeighborsRegressor
+from sktime.forecasting.compose import make_reduction
+
+regressor = KNeighborsRegressor()
+
+
+forecaster = make_reduction(regressor,
+   window_length=12,
+   strategy="recursive") # or "direct" or "dirrec" or "multioutput"
+```
+
 ### Feature Preprocessing and Engineering
+
+#### Preprocessing
+
+1. Coerce to stationary (via diff or transforms)
+2. Smoothing (e.g. moving average)
+3. Impute missing value (e.g. linear interpolation)
+4. Removing outliers
+
+#### Feature Engineering
+
+1. Lagging features/ responses
+2. Adding time stamps (e.g. day of week, month, etc)
+   3, Rolling Statistics (e.g. rolling mean, rolling std)
+
+### Multivariate Time Series
+
+- Means time series with multiple variables (e.g. temperature and humidity)
