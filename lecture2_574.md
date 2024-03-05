@@ -39,7 +39,7 @@ last_season
 
 - Forecast is a weighted average of all past observations
 - Recursively defined: $\hat{y}_{t+1|t} = \alpha y_t + (1 - \alpha) \hat{y}_{t|t-1}$
-- $\alpha$: Smoothing parameter
+- **$\alpha$: Smoothing parameter**
   - Close to 0: More weight to past observations
   - Close to 1: More weight to current observation (closer to Naive forecast)
 - **Initial Forecast**:
