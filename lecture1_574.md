@@ -45,10 +45,14 @@ ax1.set_xlabel("Lag (years)")
 ax1.set_ylabel('ACF')
 ```
 
-<!-- TODO: add stuff about SE (2.2) -->
-
 <img src="images/1_co2_ACF.png" width="400">
 <img src="images/1_sunspot_ACF.png" width="400">
+
+- Shading indicates if correlation is significantly different from 0
+
+  - $CI = \pm z_{\alpha/2} SE(r_k)$, $z_{\alpha/2} \approx 1.96$ for 95% CI
+  - $SE(r_k) = \frac{1}{\sqrt{T}}$, where $T$ is the number of observations - Or Bartlett's formula: $SE(r_k) = \sqrt{\frac{1 + 2\sum_{j=1}^{k-1}r_j^2}{T}}$
+    </br>
 
 - CO2 plot has a trend so ACF for smaller lags tend to be higher
 - **General Key Observations**:
