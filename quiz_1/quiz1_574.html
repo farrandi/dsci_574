@@ -246,14 +246,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="forecasting" class="level2">
 <h2 class="anchored" data-anchor-id="forecasting">Forecasting</h2>
+<p><img src="../images/2_all.png" width="500"></p>
 <ol type="1">
-<li><p><strong>Average</strong>: Use average of all past observations</p></li>
-<li><p><strong>Naive</strong>: Use the last observation as the forecast</p></li>
-<li><p><strong>Seasonally Adjusted Naive</strong>: Same as Naive but with seasonally adjusted data (classical decomposition) <img src="../images/2_naive_san.png" width="400"></p></li>
-<li><p><strong>Seasonally Naive</strong>: Use the last observation from the same season (only one with seasonality) <img src="../images/2_sn.png" width="250"></p></li>
-<li><p><strong>Drift</strong>: Linearly extrapolate the trend (only one that is not a straight horizontal line)</p></li>
+<li><strong>Average</strong>: Use average of all past observations</li>
+<li><strong>Naive</strong>: Use the last observation as the forecast</li>
+<li><strong>Seasonally Adjusted Naive</strong>: Same as Naive but with seasonally adjusted data (classical decomposition)</li>
+<li><strong>Seasonally Naive</strong>: Use the last observation from the same season (only one with seasonality)</li>
+<li><strong>Drift</strong>: Linearly extrapolate the trend (only one that is not a straight horizontal line)</li>
 </ol>
-<p><img src="../images/2_drift.png" width="250"></p>
 <section id="exponential-models" class="level3">
 <h3 class="anchored" data-anchor-id="exponential-models">Exponential Models</h3>
 <section id="simple-exponential-smoothing" class="level4">
@@ -570,6 +570,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>p</code>, <code>d</code>, <code>q</code>: ARIMA parameters</li>
 <li><code>P</code>, <code>D</code>, <code>Q</code>: Seasonal ARIMA parameters</li>
 <li><code>m</code>: seasonal period</li>
+</ul></li>
+<li><p>E.g. In a dataset with years and 12 months</p>
+<ul>
+<li><span class="math inline">\(p=2\)</span> means Jan is affected by Dec and Nov</li>
+<li><span class="math inline">\(P=2\)</span> means Jan is affected by Jan of the previous 2 years</li>
 </ul></li>
 <li><p>Also have <strong>SARIMAX</strong> (with exogenous variables)</p>
 <ul>

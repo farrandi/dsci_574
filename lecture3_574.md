@@ -155,8 +155,11 @@ autoarima.summary()
   - `p`, `d`, `q`: ARIMA parameters
   - `P`, `D`, `Q`: Seasonal ARIMA parameters
   - `m`: seasonal period
+- E.g. In a dataset with years and 12 months
+  - $p=2$ means Jan is affected by Dec and Nov
+  - $P=2$ means Jan is affected by Jan of the previous 2 years
 
-```python
+```
 sarima = ARIMA(data["col"], order=(3, 1, 3), seasonal_order=(1, 1, 1, 12)).fit()
 ```
 
