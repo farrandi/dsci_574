@@ -13,7 +13,7 @@
 - Assume distribution of forecasts are normal
 
 $$
-\hat{y}_{T+h|T} \pm c \times \hat{\sigma}_{h}
+\hat{y}_{T+h|T} \pm c \hat{\sigma}_{h}
 $$
 
 - $\hat{\sigma}_{h}$ is the standard deviation of the forecast
@@ -76,6 +76,8 @@ plot_prediction_intervals(train["y"], arima, "mean", valid=valid["y"], width=800
 - Assume future errors will be similar to past errors
 - Draw from the distribution of past errors to simulate future errors
 
+$$y_{T+h} = \hat{y}_{T+h|T} + \epsilon_{T+h}$$
+
 ```python
 # Fit an ETS model
 model = ETSModel(train["y"], error="add", trend="add").fit(disp=0)
@@ -99,12 +101,20 @@ ets = pd.DataFrame({"median": ets.median(axis=1),
 ### Quantile Regression
 
 - Wish to predict particular quantile instead of mean
+  - e.g $q=0.9$ so we expect 90% of the future values to be below the forecast
 
 | High Quantile                          | Low Quantile                            |
 | -------------------------------------- | --------------------------------------- |
 | Higher penalty for predicting **OVER** | Higher penalty for predicting **UNDER** |
 
-- Can use pytorch for this, see [here](https://pages.github.ubc.ca/MDS-2023-24/DSCI_574_spat-temp-mod_instructors/lectures/lecture5_uncertainty.html#quantile-regression)
+#### Quantile Regression in PyTorch
+
+see [here](https://pages.github.ubc.ca/MDS-2023-24/DSCI_574_spat-temp-mod_instructors/lectures/lecture5_uncertainty.html#quantile-regression)
+
+Quantile loss is not currently a supported criterion in pytorch but it’s easy to define ourselves. We really have two options:
+
+- Train a network for each quantile we want to predict; or
+- Train a network to output multiple quantiles at once
 
 ### Evaluating Distributional Forecast Accuracy
 
@@ -121,20 +131,88 @@ ets = pd.DataFrame({"median": ets.median(axis=1),
 
 ## Anomaly Detection
 
+- Outliers are observations that are significantly different from the rest of the data
+  - Can be due to measurement error, data entry error, or just unique observations
+
 ### Rolling Median
+
+- **Methodology**:
+  1. Subtract the rolling median from data (with suitable window size)
+  2. Calculate standard deviation of the residuals ($\hat{\sigma_r}$)
+  3. Assume normally distributed residuals then identify outliers as outside the 95% confidence interval ($\pm 1.96 \hat{\sigma_r}$)
 
 ### STL Decomposition
 
+- **Methodology**:
+  1. Decompose time series to find residuals:
+     - Non-seasonal data: use LOESS
+     - Seasonal data: use STL (Seasonal-Trend decomposition using LOESS)
+  2. Calculate $q_{0.1}$ and $q_{0.9}$ of the residuals
+  3. Identify outliers as $\pm2 \times (q_{0.9} - q_{0.1})$
+
 ### Model-based
+
+- **Methodology**:
+  1. Fit a model to the data
+  2. Identify outliers as significant deviations from model predictions (e.g. 95% confidence interval)
 
 ### ML approaches
 
+- Train an ML model to predict outliers
+- A few common packages: pyod, sklearn, luminaire, sklyline, etc.
+
 #### Isolation Forest
+
+- Built on basis of decision trees
+- **High-level idea**:
+  - randomly select a feature
+  - randomly splits that feature into 2 values
+  - repeat until all data points are isolated
+- Less splits to isolate a data point = more likely to be an outlier
+- Score = [0, 1] where 1 is an outlier, > 0.5 are normal observations.
+
+<img src="images/5_isoforest.png" width="500">
+
+- Example of sklearn's `IsolationForest`:
+
+```python
+from sklearn.ensemble import IsolationForest
+
+outliers = IsolationForest(contamination=0.05).fit_predict(df) == -1
+```
 
 #### K-NN
 
+- For each data point, calculate the distance to its k-th nearest neighbor
+  - Large distance = outlier
+- Supports 3 kNN detectors:
+  1. Largest: distance to the k-th neighbor
+  2. Mean: average distance to k neighbors
+  3. Median: median distance to k neighbors
+- pyod's `KNN()` outlier detection
+
+```python
+from pyod.models.knn import KNN
+
+outliers = KNN(contamination=0.05).fit_predict(df).labels_ == 1
+```
+
+### Global vs Local Outliers
+
+- **Global outliers**: A data point with its value is far outside of the entirety of the data set (e.g., billionaires)
+
+- **Local/Contextual outliers**: A data point is considered a contextual outlier if its value significantly deviates from the rest the data points in the same context. (e.g., earning 50K income in a developing countries)
+
 ## Imputation
 
-```
-
-```
+- **Imputation**: Filling in missing values/ outliers in a dataset
+- Overarching techniques:
+  1. Remove (`.dropna()`)
+  2. Fill manually based on some expert-interpreted values (`.fillna()`)
+  3. Fill with mean/median/mode (`.fillna()`)
+  4. Fill based on rolling statistic, e.g. rolling mean/median
+  5. Polynomial interpolation
+  6. Fill based on temporal dependence
+     - i.e. use same value from the same period last season, or average of all periods in the past season
+  7. Fill with model fitted values
+  8. Use `MICE` (Multiple Imputation by Chained Equations) from `statsmodels` or `IterativeImputer` from `sklearn`.
